@@ -6,8 +6,10 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import com.example.saurabhkaushik.skeletonapplication.Fragments.HomeFragment;
+import com.example.saurabhkaushik.skeletonapplication.Models.CaseStudyModel;
 import com.example.saurabhkaushik.skeletonapplication.R;
 
 public class HomeActivity extends FragmentActivity implements HomeFragment.OnFragmentInteractionListener {
@@ -25,7 +27,7 @@ public class HomeActivity extends FragmentActivity implements HomeFragment.OnFra
     }
 
     @Override
-    public void onFragmentInteraction(Uri uri) {
-
+    public void onFragmentInteraction(CaseStudyModel caseStudyModel) {
+        Toast.makeText(this, "Activity Data from Fragment: \n"+ caseStudyModel.getName(),Toast.LENGTH_SHORT).show();
     }
 }

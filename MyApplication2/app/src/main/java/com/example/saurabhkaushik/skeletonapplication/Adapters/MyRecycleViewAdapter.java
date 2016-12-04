@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.TextView;
 
 import com.example.saurabhkaushik.skeletonapplication.Models.CaseStudyModel;
@@ -19,6 +20,19 @@ import java.util.List;
 
 public class MyRecycleViewAdapter extends RecyclerView.Adapter<MyRecycleViewAdapter.CustomeViewHolder> {
     List<CaseStudyModel> caseList = null;
+    private onItemClickListnerz onItemClickListnerz;
+
+    public onItemClickListnerz getOnItemClickListner() {
+        return onItemClickListnerz;
+    }
+
+    public void setOnItemClickListner(onItemClickListnerz listner) {
+        this.onItemClickListnerz = listner;
+    }
+
+    public interface onItemClickListnerz {
+        void onItemClick(CaseStudyModel item);
+    }
 
     public MyRecycleViewAdapter(List<CaseStudyModel> list) {
         caseList = new ArrayList<>();
@@ -41,7 +55,14 @@ public class MyRecycleViewAdapter extends RecyclerView.Adapter<MyRecycleViewAdap
     }
 
     @Override
-    public void onBindViewHolder(CustomeViewHolder holder, int position) {
+    public void onBindViewHolder(CustomeViewHolder holder, final int position) {
+        View.OnClickListener listener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onItemClickListnerz.onItemClick(caseList.get(position));
+            }
+        };
+        holder.textView.setOnClickListener(listener);
         if(caseList != null) {
             holder.textView.setText((caseList.get(position).getName()+""));
         }

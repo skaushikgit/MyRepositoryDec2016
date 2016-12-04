@@ -11,11 +11,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.example.saurabhkaushik.skeletonapplication.Adapters.MyRecycleViewAdapter;
 import com.example.saurabhkaushik.skeletonapplication.Models.CaseStudyListModel;
 import com.example.saurabhkaushik.skeletonapplication.Models.CaseStudyModel;
 import com.example.saurabhkaushik.skeletonapplication.R;
+import com.example.saurabhkaushik.skeletonapplication.Services.HttpHandler;
 import com.example.saurabhkaushik.skeletonapplication.Services.JSONParser;
 
 import org.json.JSONArray;
@@ -37,6 +39,7 @@ public class HomeFragment extends Fragment {
     private static final String urlString = "https://api.myjson.com/bins/2ukm9";
     MyRecycleViewAdapter adapter;
     JSONParser jsonParser;
+    HttpHandler httpHandler;
     RecyclerView recyclerView;
     CaseStudyListModel caseStudyModelList;
     List<CaseStudyModel> caseList = null;
@@ -51,19 +54,9 @@ public class HomeFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
-    public HomeFragment() {
-        // Required empty public constructor
-    }
+    public HomeFragment() {}
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment HomeFragment.
-     */
-    // TODO: Rename and change types and number of parameters
+
     public static HomeFragment newInstance(String param1, String param2) {
         HomeFragment fragment = new HomeFragment();
         Bundle args = new Bundle();
@@ -86,25 +79,35 @@ public class HomeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         jsonParser = new JSONParser();
+        httpHandler = new HttpHandler();
         caseStudyModelList = new CaseStudyListModel();
-        caseList = new ArrayList<>();
+//        caseList = new ArrayList<>();
         // Inflate the layout for this fragment
         View view =  inflater.inflate(R.layout.fragment_home, container, false);
         recyclerView = (RecyclerView) view.findViewById(R.id.myRecyclerView);
-
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
-
         recyclerView.setLayoutManager(layoutManager);
+        adapter = new MyRecycleViewAdapter(caseStudyModelList.getList());
+        recyclerView.setAdapter(adapter);
+        adapter.setOnItemClickListner(new MyRecycleViewAdapter.onItemClickListnerz() {
+            @Override
+            public void onItemClick(CaseStudyModel item) {
+                Toast.makeText(getActivity(), item.getName(), Toast.LENGTH_LONG).show();
+                if (mListener != null) {
+                    mListener.onFragmentInteraction(item);
+                }
+            }
+        });
+
         new MyAsynctask().execute(urlString);
         return view;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
+//    public void onButtonPressed(Uri uri) {
+//        if (mListener != null) {
+//            mListener.onFragmentInteraction(uri);
+//        }
+//    }
 
     @Override
     public void onAttach(Context context) {
@@ -135,7 +138,7 @@ public class HomeFragment extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+        void onFragmentInteraction(CaseStudyModel caseStudyModel);
     }
 
     public void parseJSONData(String data) {
@@ -165,6 +168,8 @@ public class HomeFragment extends Fragment {
             if (params.length >0 ) {
                 urlString = params[0];
                 result = jsonParser.makeHttpRequest(urlString);
+                //httpHandler not working
+//                result = httpHandler.makeServiceCall(urlString);
             }
             return result;
         }
@@ -173,10 +178,12 @@ public class HomeFragment extends Fragment {
         protected void onPostExecute(String s) {
             parseJSONData(s);
             if (caseList.size() > 0) {
-                adapter = new MyRecycleViewAdapter(caseList);
-                recyclerView.setAdapter(adapter);
+                //To notify adapter for data change
+                adapter.notifyDataSetChanged();
+                //To refresh recyclerView
+                recyclerView.invalidate();
             }
-            Log.e("REsult", s);
+            Log.e("Result", s);
         }
     }
 }
