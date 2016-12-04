@@ -2,13 +2,28 @@ package com.example.saurabhkaushik.skeletonapplication.Fragments;
 
 import android.content.Context;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.saurabhkaushik.skeletonapplication.Adapters.MyRecycleViewAdapter;
+import com.example.saurabhkaushik.skeletonapplication.Models.CaseStudyListModel;
+import com.example.saurabhkaushik.skeletonapplication.Models.CaseStudyModel;
 import com.example.saurabhkaushik.skeletonapplication.R;
+import com.example.saurabhkaushik.skeletonapplication.Services.JSONParser;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -19,6 +34,12 @@ import com.example.saurabhkaushik.skeletonapplication.R;
  * create an instance of this fragment.
  */
 public class HomeFragment extends Fragment {
+    private static final String urlString = "https://api.myjson.com/bins/2ukm9";
+    MyRecycleViewAdapter adapter;
+    JSONParser jsonParser;
+    RecyclerView recyclerView;
+    CaseStudyListModel caseStudyModelList;
+    List<CaseStudyModel> caseList = null;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -64,8 +85,18 @@ public class HomeFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        jsonParser = new JSONParser();
+        caseStudyModelList = new CaseStudyListModel();
+        caseList = new ArrayList<>();
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_home, container, false);
+        View view =  inflater.inflate(R.layout.fragment_home, container, false);
+        recyclerView = (RecyclerView) view.findViewById(R.id.myRecyclerView);
+
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
+
+        recyclerView.setLayoutManager(layoutManager);
+        new MyAsynctask().execute(urlString);
+        return view;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -105,5 +136,47 @@ public class HomeFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    public void parseJSONData(String data) {
+        caseList = caseStudyModelList.getList();
+        try {
+            JSONObject jsonObject = new JSONObject(data);
+            JSONArray jsonArray = jsonObject.getJSONArray("casestudies");
+            for (int i=0; i<jsonArray.length(); i++) {
+                CaseStudyModel caseStudyModel = new CaseStudyModel();
+                JSONObject obj = (JSONObject) jsonArray.get(i);
+                caseStudyModel.setName(obj.getString("name"));
+                caseStudyModel.setIcon(obj.getString("icon"));
+                caseStudyModel.setIcon(obj.getString("url"));
+                caseList.add(caseStudyModel);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    class MyAsynctask extends AsyncTask<String, Integer, String> {
+
+        @Override
+        protected String doInBackground(String... params) {
+            String urlString = "";
+            String result = "";
+            if (params.length >0 ) {
+                urlString = params[0];
+                result = jsonParser.makeHttpRequest(urlString);
+            }
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            parseJSONData(s);
+            if (caseList.size() > 0) {
+                adapter = new MyRecycleViewAdapter(caseList);
+                recyclerView.setAdapter(adapter);
+            }
+            Log.e("REsult", s);
+        }
     }
 }
