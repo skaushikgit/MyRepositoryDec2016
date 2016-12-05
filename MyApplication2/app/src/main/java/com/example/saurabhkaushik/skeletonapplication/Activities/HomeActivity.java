@@ -1,5 +1,6 @@
 package com.example.saurabhkaushik.skeletonapplication.Activities;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -29,5 +30,12 @@ public class HomeActivity extends FragmentActivity implements HomeFragment.OnFra
     @Override
     public void onFragmentInteraction(CaseStudyModel caseStudyModel) {
         Toast.makeText(this, "Activity Data from Fragment: \n"+ caseStudyModel.getName(),Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(this, WebViewAcitivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putString("icon", caseStudyModel.getIcon());
+        bundle.putString("name", caseStudyModel.getName());
+        bundle.putString("url", caseStudyModel.getUrl());
+        intent.putExtras(bundle);
+        startActivity(intent);
     }
 }
