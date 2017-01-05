@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">EbatesPractise</string>
+    <string name="hello_tv">This is my textView</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>
