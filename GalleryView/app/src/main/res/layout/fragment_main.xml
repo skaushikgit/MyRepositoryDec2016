@@ -4,28 +4,16 @@
     android:layout_height="match_parent"
     tools:context="com.example.saurabhkaushik.galleryview.Fragments.MainFragment">
 
-    <LinearLayout
+    <com.example.saurabhkaushik.galleryview.Views.GridViewModule
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="2dp"
-        android:orientation="vertical">
+        android:columnWidth="50dp"
+        android:numColumns="auto_fit"
+        android:verticalSpacing="10dp"
+        android:horizontalSpacing="10dp"
+        android:stretchMode="columnWidth"
+        android:gravity="center">
 
-        <Gallery
-            android:id="@+id/gallaryViewId"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@color/colorPrimary"/>
-
-        <ImageView
-            android:id="@+id/imageViewId"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="4"
-            android:background="@color/colorAccent"
-            android:src="@drawable/one"/>
-
-    </LinearLayout>
-
+    </com.example.saurabhkaushik.galleryview.Views.GridViewModule>
 
 </FrameLayout>
