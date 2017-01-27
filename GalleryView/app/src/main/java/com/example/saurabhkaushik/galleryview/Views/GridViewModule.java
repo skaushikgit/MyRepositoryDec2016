@@ -9,6 +9,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 
 import com.example.saurabhkaushik.galleryview.R;
+import com.example.saurabhkaushik.galleryview.Utils.ImageUtils;
 
 /**
  * Created by saurabhkaushik on 25/01/17.
@@ -50,7 +51,7 @@ public class GridViewModule extends GridView{
 
         @Override
         public int getCount() {
-            return mThumbIds.length;
+            return mThumbIds_hd.length;
         }
 
         @Override
@@ -74,10 +75,20 @@ public class GridViewModule extends GridView{
             } else {
                 imageView = (ImageView) convertView;
             }
-            imageView.setImageResource(mThumbIds[position]);
+//            imageView.setImageResource(mThumbIds_hd[position]);
+            imageView.setImageBitmap(ImageUtils.decodeFullImage(getResources(), mThumbIds_hd[position], 150, 150));
             return imageView;
         }
 
+
+        private Integer[] mThumbIds_hd = {
+                R.drawable.one,
+                R.drawable.two,
+                R.drawable.three,
+                R.drawable.four,
+                R.drawable.five,
+                R.drawable.six
+        };
 
         private Integer[] mThumbIds = {
                 R.drawable.sample_2, R.drawable.sample_3,
