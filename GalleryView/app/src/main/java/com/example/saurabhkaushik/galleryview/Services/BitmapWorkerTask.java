@@ -19,6 +19,15 @@ public class BitmapWorkerTask extends AsyncTask<Integer, Void, Bitmap> {
     private final WeakReference<ImageView> imageViewReference;
     public int data = 0;
     Resources resources;
+    private AddBitmapToMemoryCache addBitmapToMemoryCacheDelegate;
+
+    public interface AddBitmapToMemoryCache {
+        public void addBitmapToCache(String imageKey, Bitmap bitmap);
+    }
+
+    public void setAddBitmapToMemoryCacheDelegate(AddBitmapToMemoryCache addBitmapToMemoryCache) {
+        addBitmapToMemoryCacheDelegate = addBitmapToMemoryCache;
+    }
 
     public BitmapWorkerTask(ImageView imageView, Resources resources) {
         imageViewReference = new WeakReference<ImageView>(imageView);
@@ -28,7 +37,9 @@ public class BitmapWorkerTask extends AsyncTask<Integer, Void, Bitmap> {
     @Override
     protected Bitmap doInBackground(Integer... params) {
         data = params[0];
-        return ImageUtils.decodeFullImage(resources, data, 100, 100);
+        final Bitmap bitmap = ImageUtils.decodeFullImage(resources, data, 100, 100);
+        addBitmapToMemoryCacheDelegate.addBitmapToCache(String.valueOf(params[0]), bitmap);
+        return bitmap;
     }
 
     @Override

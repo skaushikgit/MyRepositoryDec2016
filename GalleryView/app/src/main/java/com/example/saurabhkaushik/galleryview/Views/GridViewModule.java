@@ -2,7 +2,9 @@ package com.example.saurabhkaushik.galleryview.Views;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.support.v4.util.LruCache;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +22,9 @@ import com.example.saurabhkaushik.galleryview.Services.BitmapWorkerTask;
 public class GridViewModule extends GridView{
     Context mContext;
     ImageAdapter imageAdapter;
+    private LruCache<String, Bitmap> mMemoryCache;
+    BitmapWorkerTask.AddBitmapToMemoryCache addBitmapToMemoryCacheDelegate;
+
     public GridViewModule(Context context) {
         super(context);
         mContext = context;
@@ -40,9 +45,40 @@ public class GridViewModule extends GridView{
 
 
     protected void init() {
+        // Get max available VM memory, exceeding this amount will throw an
+        // OutOfMemory exception. Stored in kilobytes as LruCache takes an
+        // int in its constructor.
+        final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
+        // Use 1/8th of the available memory for this memory cache.
+        final int cacheSize = maxMemory / 8;
+        mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
+            @Override
+            protected int sizeOf(String key, Bitmap bitmap) {
+                // The cache size will be measured in kilobytes rather than
+                // number of items.
+                return bitmap.getByteCount() / 1024;
+            }
+        };
+
+        addBitmapToMemoryCacheDelegate = new BitmapWorkerTask.AddBitmapToMemoryCache() {
+            @Override
+            public void addBitmapToCache(String imageKey, Bitmap bitmap) {
+                addBitmapToMemoryCache(imageKey, bitmap);
+            }
+        };
         imageAdapter = new ImageAdapter(mContext);
         this.setAdapter(imageAdapter);
     }
+
+    public void addBitmapToMemoryCache(String key, Bitmap bitmap) {
+        if (getBitmapFromMemCache(key) == null) {
+            mMemoryCache.put(key, bitmap);
+        }
+    }
+    public Bitmap getBitmapFromMemCache(String key) {
+        return mMemoryCache.get(key);
+    }
+
 
     class ImageAdapter extends BaseAdapter {
         Context mContext;
@@ -78,16 +114,22 @@ public class GridViewModule extends GridView{
                 imageView = (ImageView) convertView;
             }
             loadBitmap(getResources(), imageView, mThumbIds_hd[position]);
-//            imageView.setImageBitmap(ImageUtils.decodeFullImage(getResources(), mThumbIds_hd[position], 150, 150));
             return imageView;
         }
 
         private void loadBitmap(Resources resources, ImageView imageView, int resId){
-            if (cancelPotentialWork(resId, imageView)) {
-                final BitmapWorkerTask task = new BitmapWorkerTask(imageView, resources);
-                final BitmapWorkerTask.AsyncDrawable asyncDrawable = new BitmapWorkerTask.AsyncDrawable(getResources(), null, task);
-                imageView.setImageDrawable(asyncDrawable);
-                task.execute(resId);
+            final String imageKey = String.valueOf(resId);
+            final Bitmap bitmap = getBitmapFromMemCache(imageKey);
+            if (bitmap != null) {
+                imageView.setImageBitmap(bitmap);
+            } else {
+                if (cancelPotentialWork(resId, imageView)) {
+                    final BitmapWorkerTask task = new BitmapWorkerTask(imageView, resources);
+                    task.setAddBitmapToMemoryCacheDelegate(addBitmapToMemoryCacheDelegate);
+                    final BitmapWorkerTask.AsyncDrawable asyncDrawable = new BitmapWorkerTask.AsyncDrawable(getResources(), null, task);
+                    imageView.setImageDrawable(asyncDrawable);
+                    task.execute(resId);
+                }
             }
         }
 
