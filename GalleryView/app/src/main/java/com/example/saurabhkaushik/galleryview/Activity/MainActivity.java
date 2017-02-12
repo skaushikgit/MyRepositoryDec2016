@@ -1,6 +1,7 @@
 package com.example.saurabhkaushik.galleryview.Activity;
 
 import android.net.Uri;
+import android.os.PersistableBundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
@@ -21,6 +22,16 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
         fragmentTransaction.add(R.id.fragmentContainer, mainFragment);
         fragmentTransaction.commit();
 
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        super.onSaveInstanceState(outState, outPersistentState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
     }
 
     @Override

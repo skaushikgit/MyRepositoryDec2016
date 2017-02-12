@@ -89,7 +89,7 @@ public class GridViewModule extends GridView{
 
         @Override
         public int getCount() {
-            return mThumbIds_hd.length;
+            return mThumbIds.length;
         }
 
         @Override
@@ -109,11 +109,11 @@ public class GridViewModule extends GridView{
                 imageView = new ImageView(mContext);
                 imageView.setLayoutParams(new GridView.LayoutParams(150, 150));
                 imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                imageView.setPadding(8,8,8,8);
+                imageView.setPadding(10,10,10,10);
             } else {
                 imageView = (ImageView) convertView;
             }
-            loadBitmap(getResources(), imageView, mThumbIds_hd[position]);
+            loadBitmap(getResources(), imageView, mThumbIds[position]);
             return imageView;
         }
 
